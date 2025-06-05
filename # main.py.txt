@@ -1,0 +1,38 @@
+# main.py
+
+from fastapi import FastAPI, Query
+from fastapi.responses import JSONResponse
+import uvicorn
+
+app = FastAPI(title="Prime Checker API", version="1.0")
+
+def is_prime(n: int) -> bool:
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+@app.get("/is-prime")
+async def check_prime(number: int = Query(..., gt=0, description="Enter a positive integer")):
+    try:
+        result = is_prime(number)
+        return JSONResponse(
+            status_code=200,
+            content={"number": number, "is_prime": result}
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
+
+# To run locally:
+# uvicorn main:app --reload
